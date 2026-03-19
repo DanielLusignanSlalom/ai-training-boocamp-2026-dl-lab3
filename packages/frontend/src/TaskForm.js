@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Paper, Typography, Box } from '@mui/material';
+import { TextField, Button, Paper, Typography, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
+
+const PRIORITY_CONFIG = {
+  P1: { label: 'P1 – High',   color: '#f44336' },
+  P2: { label: 'P2 – Medium', color: '#ff9800' },
+  P3: { label: 'P3 – Low',    color: '#4caf50' },
+};
 
 function TaskForm({ onSave, initialTask }) {
   const [title, setTitle] = useState(initialTask?.title || '');
   const [description, setDescription] = useState(initialTask?.description || '');
   const [dueDate, setDueDate] = useState(initialTask?.due_date || '');
+  const [priority, setPriority] = useState(initialTask?.priority || 'P3');
   const [error, setError] = useState(null);
 
   // Helper to normalize date string to YYYY-MM-DD format
@@ -30,10 +37,12 @@ function TaskForm({ onSave, initialTask }) {
       setTitle(initialTask.title || '');
       setDescription(initialTask.description || '');
       setDueDate(normalizeDateString(initialTask.due_date));
+      setPriority(initialTask.priority || 'P3');
     } else {
       setTitle('');
       setDescription('');
       setDueDate('');
+      setPriority('P3');
     }
   }, [initialTask]);
 
@@ -44,10 +53,11 @@ function TaskForm({ onSave, initialTask }) {
       return;
     }
     setError(null);
-    await onSave({ title, description, due_date: dueDate });
+    await onSave({ title, description, due_date: dueDate, priority });
     setTitle('');
     setDescription('');
     setDueDate('');
+    setPriority('P3');
   };
 
   return (
@@ -120,29 +130,60 @@ function TaskForm({ onSave, initialTask }) {
             }
           }}
         />
-        <TextField
-          id="task-due-date"
-          label="Due Date"
-          type="date"
-          value={dueDate}
-          onChange={e => setDueDate(e.target.value)}
-          variant="outlined"
-          fullWidth
-          size="small"
-          InputLabelProps={{ shrink: true }}
-          inputProps={{ 'data-testid': 'due-date-input' }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-              '&:hover fieldset': {
-                borderColor: '#1976d2',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#1976d2',
+        <Box display="flex" gap={1.5}>
+          <TextField
+            id="task-due-date"
+            label="Due Date"
+            type="date"
+            value={dueDate}
+            onChange={e => setDueDate(e.target.value)}
+            variant="outlined"
+            fullWidth
+            size="small"
+            InputLabelProps={{ shrink: true }}
+            inputProps={{ 'data-testid': 'due-date-input' }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                '&:hover fieldset': { borderColor: '#1976d2' },
+                '&.Mui-focused fieldset': { borderColor: '#1976d2' }
               }
-            }
-          }}
-        />
+            }}
+          />
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel id="task-priority-label" shrink>Priority</InputLabel>
+            <Select
+              labelId="task-priority-label"
+              id="task-priority"
+              value={priority}
+              label="Priority"
+              onChange={e => setPriority(e.target.value)}
+              inputProps={{ 'data-testid': 'priority-select' }}
+              sx={{
+                borderRadius: 2,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: PRIORITY_CONFIG[priority]?.color,
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: PRIORITY_CONFIG[priority]?.color,
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: PRIORITY_CONFIG[priority]?.color,
+                },
+                '& .MuiSelect-select': {
+                  color: PRIORITY_CONFIG[priority]?.color,
+                  fontWeight: 700,
+                }
+              }}
+            >
+              {Object.entries(PRIORITY_CONFIG).map(([value, { label, color }]) => (
+                <MenuItem key={value} value={value} sx={{ color, fontWeight: 700 }}>
+                  {label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
         {error && <Typography color="error" sx={{ fontWeight: 500, fontSize: '0.875rem' }}>{error}</Typography>}
         <Box display="flex" gap={2}>
           <Button 

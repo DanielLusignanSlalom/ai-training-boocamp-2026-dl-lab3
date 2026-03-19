@@ -12,8 +12,8 @@ const server = setupServer(
     return res(
       ctx.status(200),
       ctx.json([
-        { id: 1, title: 'Test Task 1', description: 'Desc 1', due_date: '2025-09-30', completed: 0 },
-        { id: 2, title: 'Test Task 2', description: 'Desc 2', due_date: '2025-10-01', completed: 1 },
+        { id: 1, title: 'Test Task 1', description: 'Desc 1', due_date: '2025-09-30', completed: 0, priority: 'P1' },
+        { id: 2, title: 'Test Task 2', description: 'Desc 2', due_date: '2025-10-01', completed: 1, priority: 'P3' },
       ])
     );
   }),
@@ -34,6 +34,7 @@ const server = setupServer(
         title,
         description: req.body.description || '',
         due_date: req.body.due_date || null,
+        priority: req.body.priority || 'P3',
         completed: 0,
       })
     );
@@ -102,6 +103,7 @@ describe('TODO App', () => {
           title,
           description: description || '',
           due_date: req.body.due_date || null,
+          priority: req.body.priority || 'P3',
           completed: 0,
         };
         tasks = [...tasks, newTask];
@@ -149,5 +151,23 @@ describe('TODO App', () => {
     await waitFor(() => {
       expect(screen.getByText('No tasks found.')).toBeInTheDocument();
     });
+  });
+
+  test('displays priority chips with correct colors', async () => {
+    await act(async () => {
+      render(<App />);
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Test Task 1')).toBeInTheDocument();
+    });
+    const p1Chip = screen.getByTestId('priority-chip-1');
+    expect(p1Chip).toBeInTheDocument();
+    expect(p1Chip).toHaveTextContent('P1');
+    expect(p1Chip).toHaveStyle({ background: '#f44336' });
+
+    const p3Chip = screen.getByTestId('priority-chip-2');
+    expect(p3Chip).toBeInTheDocument();
+    expect(p3Chip).toHaveTextContent('P3');
+    expect(p3Chip).toHaveStyle({ background: '#4caf50' });
   });
 });

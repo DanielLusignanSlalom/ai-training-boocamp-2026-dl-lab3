@@ -1,0 +1,9 @@
+flowchart LR
+    user[User in Browser]
+    frontend[React Frontend\npackages/frontend]
+    backend[Express API\npackages/backend]
+    store[(In-Memory SQLite Store)]
+
+    user -->|Uses| frontend
+    frontend -->|HTTP JSON requests\n/api/tasks| backend
+    backend -->|Reads and writes tasks| store
